@@ -6,14 +6,19 @@ const DataContextProvider = (props) => {
   //declarations
   const [intialData, setInitialData] = useState();
   const [currentDetailPageID, setCurrentDetailPageID] = useState();
-  const [tempData, setTempData] = useState();
+  const [descMode, setDescMode] = useState(false);
+  const [filterPref, setFilterPref] = useState("");
   const [offsetLimit, setOffsetLimit] = useState(1);
   const env = "https://fakestoreapi.com/";
   //async task's
   const setIntialData = async () => {
     try {
-      const iniRes = await callApi(`${env}products?limit=${offsetLimit * 10}`);
+      // if (!filterMode) {
+      const iniRes = await callApi(`${env}products?limit=${offsetLimit * 5}`);
       setInitialData(iniRes);
+      // } else {
+      // return;
+      // }
     } catch (e) {
       console.error(e);
     }
@@ -24,10 +29,6 @@ const DataContextProvider = (props) => {
     return res;
   };
 
-  //   const increaseOffSet = () => setOffsetLimit(offsetLimit + 1);
-
-  //this function is the first that will run as soon as our homepage
-  // get's mounted on initial render
   useEffect(() => {
     setIntialData();
   }, [offsetLimit]);
@@ -36,6 +37,16 @@ const DataContextProvider = (props) => {
 
   function setDetailPageID(id) {
     setCurrentDetailPageID(id);
+  }
+
+  function activeDescMode() {
+    setFilterPref("");
+    setDescMode(true);
+  }
+
+  function activeFilterMode(value) {
+    setDescMode(false);
+    setFilterPref(value);
   }
 
   function addToCart(id, quantity = 1, size) {
@@ -55,16 +66,16 @@ const DataContextProvider = (props) => {
       localStorage.setItem("cart_data", JSON.stringify([newPayload]));
     }
   }
-  //listening to scroll event on page for infinite scroll
-  //   window.addEventListener("scroll", () => {
-  //     if (
-  //       window.scrollY + window.innerHeight >=
-  //         document.documentElement.scrollHeight &&
-  //       !tempData
-  //     ) {
-  //       setOffsetLimit(offsetLimit + 1);
-  //     }
-  //   });
+  // listening to scroll event on page for infinite scroll
+  window.addEventListener("scroll", (e) => {
+    e.preventDefault();
+    if (
+      window.scrollY + window.innerHeight >=
+      document.documentElement.scrollHeight
+    ) {
+      setOffsetLimit(offsetLimit + 1);
+    }
+  });
   function sendSizeDetails() {
     return ["xs", "x", "m", "l", "xl"];
   }
