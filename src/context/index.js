@@ -7,18 +7,21 @@ const DataContextProvider = (props) => {
   const [intialData, setInitialData] = useState();
   const [currentDetailPageID, setCurrentDetailPageID] = useState();
   const [descMode, setDescMode] = useState(false);
-  const [filterPref, setFilterPref] = useState("");
   const [offsetLimit, setOffsetLimit] = useState(1);
   const env = "https://fakestoreapi.com/";
   //async task's
   const setIntialData = async () => {
     try {
-      // if (!filterMode) {
-      const iniRes = await callApi(`${env}products?limit=${offsetLimit * 5}`);
+      setInitialData(null);
+      let iniRes;
+      let apiToCall;
+      if (!descMode) {
+        apiToCall = `${env}products?limit=${offsetLimit * 5}`;
+      } else {
+        apiToCall = `${env}products?sort=desc`;
+      }
+      iniRes = await callApi(apiToCall);
       setInitialData(iniRes);
-      // } else {
-      // return;
-      // }
     } catch (e) {
       console.error(e);
     }
@@ -31,7 +34,7 @@ const DataContextProvider = (props) => {
 
   useEffect(() => {
     setIntialData();
-  }, [offsetLimit]);
+  }, [offsetLimit, descMode]);
 
   // <<----- async task end's ------>>
 
@@ -39,17 +42,11 @@ const DataContextProvider = (props) => {
     setCurrentDetailPageID(id);
   }
 
-  function activeDescMode() {
-    setFilterPref("");
-    setDescMode(true);
+  function activeDescMode(value) {
+    setDescMode(value);
   }
 
-  function activeFilterMode(value) {
-    setDescMode(false);
-    setFilterPref(value);
-  }
-
-  function addToCart(id, quantity = 1, size) {
+  function addToCart(id, size, quantity = 1) {
     const newPayload = { id, quantity, size };
     const localData = JSON.parse(localStorage.getItem("cart_data"));
     if (localData && localData.length > 0) {
@@ -66,12 +63,19 @@ const DataContextProvider = (props) => {
       localStorage.setItem("cart_data", JSON.stringify([newPayload]));
     }
   }
+
+  async function getCategory() {
+    const res = await callApi(`${env}products/categories`);
+    return res;
+  }
   // listening to scroll event on page for infinite scroll
   window.addEventListener("scroll", (e) => {
     e.preventDefault();
     if (
       window.scrollY + window.innerHeight >=
-      document.documentElement.scrollHeight
+        document.documentElement.scrollHeight &&
+      window.location.pathname === "/" &&
+      !descMode
     ) {
       setOffsetLimit(offsetLimit + 1);
     }
@@ -87,6 +91,8 @@ const DataContextProvider = (props) => {
         getSingleProduct,
         sendSizeDetails,
         addToCart,
+        getCategory,
+        activeDescMode,
       }}
     >
       {props.children}

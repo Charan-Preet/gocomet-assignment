@@ -1,6 +1,7 @@
 import DataContext from "../context";
 import { useContext, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 import "./common.style.css";
 
@@ -10,9 +11,8 @@ export default function DetailView() {
   const [getSize, setGetSize] = useState(null);
   const [selectedSize, setSelectedSize] = useState("");
   const [currentItemId, setCurrentItemId] = useState(null);
-  const { getSingleProduct, sendSizeDetails, addToCart } = useContext(
-    DataContext
-  );
+  const { getSingleProduct, sendSizeDetails, addToCart } =
+    useContext(DataContext);
 
   const getData = async (id) => {
     const data = await getSingleProduct(id);
@@ -133,7 +133,14 @@ export default function DetailView() {
     <div className="w-70 flex flex-row justify-around flex-wrap">
       <div>
         {data ? (
-          <img alt={data?.title} src={data?.image} width="350" />
+          <>
+            <TransformWrapper>
+              <TransformComponent>
+                {" "}
+                <img alt={data?.title} src={data?.image} width="350" />
+              </TransformComponent>
+            </TransformWrapper>
+          </>
         ) : (
           <span>Loading...</span>
         )}
@@ -174,8 +181,9 @@ export default function DetailView() {
             <button
               type="button"
               onClick={() => addToCart(currentItemId, selectedSize)}
-              className={`add-to-cart sm:w-50 text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 ${selectedSize ===
-                "" && "opacity-50 pointer-events-none"}`}
+              className={`add-to-cart sm:w-50 text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 ${
+                selectedSize === "" && "opacity-50 pointer-events-none"
+              }`}
             >
               <div className="flex flex-row sm:justify-start">
                 <svg
