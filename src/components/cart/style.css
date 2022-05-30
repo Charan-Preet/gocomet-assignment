@@ -1,0 +1,9 @@
+ th, td {
+    padding: 0.5rem;
+  }
+
+  table{
+    display: block;
+    overflow: auto;
+    height: 27rem;
+  }

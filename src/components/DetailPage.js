@@ -2,6 +2,8 @@ import DataContext from "../context";
 import { useContext, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+import Cart from "./cart";
+import Modal from "react-awesome-modal";
 
 import "./common.style.css";
 
@@ -10,9 +12,15 @@ export default function DetailView() {
   const [data, setData] = useState(null);
   const [getSize, setGetSize] = useState(null);
   const [selectedSize, setSelectedSize] = useState("");
+  const [coustomId, setCoustomId] = useState(null);
   const [currentItemId, setCurrentItemId] = useState(null);
-  const { getSingleProduct, sendSizeDetails, addToCart } =
-    useContext(DataContext);
+  const {
+    getSingleProduct,
+    sendSizeDetails,
+    addToCart,
+    isCartOpen,
+    cartOpenClose,
+  } = useContext(DataContext);
 
   const getData = async (id) => {
     const data = await getSingleProduct(id);
@@ -25,8 +33,20 @@ export default function DetailView() {
     const id = location.pathname.split("/")[2];
     setCurrentItemId(id);
     getData(id);
+    setCoustomId((Math.random() * 49 + 1).toFixed(3));
   }, []);
 
+  const coustomModal = () => {
+    try {
+      return (
+        <Modal visible={isCartOpen} width="600" height="500" effect="fadeInUp">
+          <Cart />
+        </Modal>
+      );
+    } catch (e) {
+      return;
+    }
+  };
   const displaySizeChart = getSize?.map((ele) => {
     return (
       <div
@@ -178,34 +198,45 @@ export default function DetailView() {
           </div>
           <br />
           <div className="flex justify-center set-button-order">
-            <button
-              type="button"
-              onClick={() => addToCart(currentItemId, selectedSize)}
-              className={`add-to-cart sm:w-50 text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 ${
-                selectedSize === "" && "opacity-50 pointer-events-none"
-              }`}
-            >
-              <div className="flex flex-row sm:justify-start">
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M5 4H19C19.5523 4 20 4.44771 20 5V19C20 19.5523 19.5523 20 19 20H5C4.44772 20 4 19.5523 4 19V5C4 4.44772 4.44771 4 5 4ZM2 5C2 3.34315 3.34315 2 5 2H19C20.6569 2 22 3.34315 22 5V19C22 20.6569 20.6569 22 19 22H5C3.34315 22 2 20.6569 2 19V5ZM12 12C9.23858 12 7 9.31371 7 6H9C9 8.56606 10.6691 10 12 10C13.3309 10 15 8.56606 15 6H17C17 9.31371 14.7614 12 12 12Z"
-                    fill="currentColor"
-                  />
-                </svg>
-                <div className="ml-2">Add To Cart</div>
-              </div>
-            </button>
+            {data && (
+              <button
+                type="button"
+                onClick={() =>
+                  addToCart(
+                    currentItemId,
+                    selectedSize,
+                    data.title,
+                    data.image,
+                    coustomId
+                  )
+                }
+                className={`add-to-cart sm:w-50 text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 ${
+                  selectedSize === "" && "opacity-50 pointer-events-none"
+                }`}
+              >
+                <div className="flex flex-row sm:justify-start">
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M5 4H19C19.5523 4 20 4.44771 20 5V19C20 19.5523 19.5523 20 19 20H5C4.44772 20 4 19.5523 4 19V5C4 4.44772 4.44771 4 5 4ZM2 5C2 3.34315 3.34315 2 5 2H19C20.6569 2 22 3.34315 22 5V19C22 20.6569 20.6569 22 19 22H5C3.34315 22 2 20.6569 2 19V5ZM12 12C9.23858 12 7 9.31371 7 6H9C9 8.56606 10.6691 10 12 10C13.3309 10 15 8.56606 15 6H17C17 9.31371 14.7614 12 12 12Z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                  <div className="ml-2">Add To Cart</div>
+                </div>
+              </button>
+            )}
             <button
               data-modal-toggle="popup-modal"
               type="button"
+              onClick={() => cartOpenClose(true)}
               className="checkout-cart inline-block px-6 py-2 border-2 border-gray-800 text-gray-800 font-medium text-xs leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0 transition duration-150 ease-in-out"
             >
               View Cart
@@ -217,6 +248,9 @@ export default function DetailView() {
     </div>
   );
   return (
-    <div className="flex justify-center mt-4 ml-2">{detailsDisplay()}</div>
+    <>
+      {coustomModal()}
+      <div className="flex justify-center mt-4 ml-2">{detailsDisplay()}</div>
+    </>
   );
 }

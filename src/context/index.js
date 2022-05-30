@@ -5,19 +5,21 @@ const DataContext = createContext();
 const DataContextProvider = (props) => {
   //declarations
   const [intialData, setInitialData] = useState();
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const [currentDetailPageID, setCurrentDetailPageID] = useState();
+  const [cartData, setCartData] = useState(null);
   const [descMode, setDescMode] = useState(false);
   const [offsetLimit, setOffsetLimit] = useState(1);
   const env = "https://fakestoreapi.com/";
   //async task's
   const setIntialData = async () => {
     try {
-      setInitialData(null);
       let iniRes;
       let apiToCall;
       if (!descMode) {
         apiToCall = `${env}products?limit=${offsetLimit * 5}`;
       } else {
+        setInitialData(null);
         apiToCall = `${env}products?sort=desc`;
       }
       iniRes = await callApi(apiToCall);
@@ -34,6 +36,10 @@ const DataContextProvider = (props) => {
 
   useEffect(() => {
     setIntialData();
+    if (!cartData) {
+      const localData = JSON.parse(localStorage.getItem("cart_data"));
+      if (localData) setCartData(localData);
+    }
   }, [offsetLimit, descMode]);
 
   // <<----- async task end's ------>>
@@ -46,31 +52,46 @@ const DataContextProvider = (props) => {
     setDescMode(value);
   }
 
-  function addToCart(id, size, quantity = 1) {
-    const newPayload = { id, quantity, size };
+  function addToCart(id, size, title, image, coustomId, quantity = 1) {
+    const newPayload = { id, quantity, size, title, image, coustomId };
     const localData = JSON.parse(localStorage.getItem("cart_data"));
     if (localData && localData.length > 0) {
       for (let i = 0; i < localData.length; i++) {
         if (localData[i].id === id && localData[i].size === size) {
           localData[i].quantity++;
           localStorage.setItem("cart_data", JSON.stringify(localData));
+          setCartData(localData);
           return;
         }
       }
       localData.push(newPayload);
       localStorage.setItem("cart_data", JSON.stringify(localData));
+      setCartData(localData);
     } else {
       localStorage.setItem("cart_data", JSON.stringify([newPayload]));
+      setCartData([newPayload]);
     }
+  }
+
+  function removeProductFromCart(coustomId, size) {
+    let temp = [];
+    for (let i = 0; i < cartData.length; i++) {
+      if (cartData[i].coustomId === coustomId && size === cartData[i].size) {
+        continue;
+      } else temp.push(cartData[i]);
+    }
+    setCartData(temp);
+    localStorage.setItem("cart_data", JSON.stringify(temp));
   }
 
   async function getCategory() {
     const res = await callApi(`${env}products/categories`);
     return res;
   }
+
+  const cartOpenClose = (value) => setIsCartOpen(value);
   // listening to scroll event on page for infinite scroll
   window.addEventListener("scroll", (e) => {
-    e.preventDefault();
     if (
       window.scrollY + window.innerHeight >=
         document.documentElement.scrollHeight &&
@@ -83,6 +104,7 @@ const DataContextProvider = (props) => {
   function sendSizeDetails() {
     return ["xs", "x", "m", "l", "xl"];
   }
+
   return (
     <DataContext.Provider
       value={{
@@ -93,6 +115,10 @@ const DataContextProvider = (props) => {
         addToCart,
         getCategory,
         activeDescMode,
+        isCartOpen,
+        cartOpenClose,
+        removeProductFromCart,
+        cartData,
       }}
     >
       {props.children}
