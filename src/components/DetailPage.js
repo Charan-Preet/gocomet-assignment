@@ -122,6 +122,7 @@ export default function DetailView() {
                 aria-label="enter pincode"
                 aria-describedby="pincode"
                 pattern="^[1-9][0-9]{5}$"
+                disabled={true}
               />
               <button
                 className="btn inline-block px-6 py-2.5 bg-pink-500 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-pink-600 hover:shadow-lg focus:shadow-lg focus:outline-none focus:ring-0 active:bg-pink-800 active:shadow-lg transition duration-150 ease-in-out flex items-center"
