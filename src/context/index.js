@@ -8,6 +8,8 @@ const DataContextProvider = (props) => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [currentDetailPageID, setCurrentDetailPageID] = useState();
   const [cartData, setCartData] = useState(null);
+  const [inSearchMode, setInSearchMode] = useState(false);
+  const [onSearchCalled, setOnSearchCalled] = useState(false);
   const [descMode, setDescMode] = useState(false);
   const [offsetLimit, setOffsetLimit] = useState(1);
   const env = "https://fakestoreapi.com/";
@@ -40,7 +42,7 @@ const DataContextProvider = (props) => {
       const localData = JSON.parse(localStorage.getItem("cart_data"));
       if (localData) setCartData(localData);
     }
-  }, [offsetLimit, descMode]);
+  }, [offsetLimit, descMode, onSearchCalled]);
 
   // <<----- async task end's ------>>
 
@@ -88,6 +90,33 @@ const DataContextProvider = (props) => {
     const res = await callApi(`${env}products/categories`);
     return res;
   }
+  async function getAllData() {
+    const res = await callApi(`${env}products`);
+    return res;
+  }
+  async function onSearchClick(val) {
+    const searchAble = val.split(" ");
+    const temp = [];
+    const data = await getAllData();
+    if (intialData) {
+      if (val === "") {
+        setInSearchMode(false);
+        setOnSearchCalled(!onSearchCalled);
+      } else {
+        setInSearchMode(true);
+        for (let i = 0; i < searchAble.length; i++) {
+          for (let j = 0; j < data.length; j++) {
+            const title = data[j].title.split(" ");
+            for (let k = 0; k < title.length; k++) {
+              if (searchAble[i].toLowerCase() === title[k].toLowerCase())
+                temp.push(data[j]);
+            }
+          }
+        }
+      }
+    }
+    setInitialData(temp);
+  }
 
   const cartOpenClose = (value) => setIsCartOpen(value);
   // listening to scroll event on page for infinite scroll
@@ -96,7 +125,8 @@ const DataContextProvider = (props) => {
       window.scrollY + window.innerHeight >=
         document.documentElement.scrollHeight &&
       window.location.pathname === "/" &&
-      !descMode
+      !descMode &&
+      !inSearchMode
     ) {
       setOffsetLimit(offsetLimit + 1);
     }
@@ -111,10 +141,12 @@ const DataContextProvider = (props) => {
         intialData,
         setDetailPageID,
         getSingleProduct,
+        onSearchClick,
         sendSizeDetails,
         addToCart,
         getCategory,
         activeDescMode,
+        inSearchMode,
         isCartOpen,
         cartOpenClose,
         removeProductFromCart,
