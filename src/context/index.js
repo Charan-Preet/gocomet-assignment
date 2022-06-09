@@ -51,6 +51,7 @@ const DataContextProvider = (props) => {
   }
 
   function activeDescMode(value) {
+    if(value !== descMode)  setInitialData(null)
     setDescMode(value);
   }
 
@@ -97,13 +98,15 @@ const DataContextProvider = (props) => {
   async function onSearchClick(val) {
     const searchAble = val.split(" ");
     const temp = [];
-    const data = await getAllData();
     if (intialData) {
       if (val === "") {
+        setInitialData(null)
         setInSearchMode(false);
         setOnSearchCalled(!onSearchCalled);
       } else {
+        setInitialData(null)
         setInSearchMode(true);
+        const data = await getAllData();
         for (let i = 0; i < searchAble.length; i++) {
           for (let j = 0; j < data.length; j++) {
             const title = data[j].title.split(" ");
@@ -126,7 +129,7 @@ const DataContextProvider = (props) => {
         document.documentElement.scrollHeight &&
       window.location.pathname === "/" &&
       !descMode &&
-      !inSearchMode
+      !inSearchMode && offsetLimit<=4
     ) {
       setOffsetLimit(offsetLimit + 1);
     }
@@ -143,6 +146,7 @@ const DataContextProvider = (props) => {
         getSingleProduct,
         onSearchClick,
         sendSizeDetails,
+        inSearchMode,
         addToCart,
         getCategory,
         activeDescMode,

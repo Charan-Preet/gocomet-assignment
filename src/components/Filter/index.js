@@ -4,7 +4,7 @@ import Select from "react-select";
 import "./style.css";
 
 export default function FilterSearch() {
-  const { activeDescMode, onSearchClick, inSearchMode } =
+  const { activeDescMode, onSearchClick, inSearchMode,intialData } =
     useContext(DataContext);
   const [filterPref, setFilterPref] = useState("");
   const [searchValue, setSearchValue] = useState("");
@@ -23,6 +23,17 @@ export default function FilterSearch() {
       <div className="flex justify-between search-product mr-2">
         <form className="flex flex-row">
           <input
+          onKeyDown={(e) => {
+            if(intialData){
+              if(e.key === "Enter"){
+                e.preventDefault();
+                if(inSearchMode){ onSearchClick("")
+                setSearchValue("")
+              }
+                else onSearchClick(searchValue)
+              }
+            }
+          }}
             value={searchValue}
             onChange={(e) => {
               e.preventDefault();
@@ -33,9 +44,15 @@ export default function FilterSearch() {
           <div className="flex item-center">
             <button
               type="button"
-              onClick={() => onSearchClick(searchValue)}
-              class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-7 py-1.5 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700"
+              onClick={() => {
+                  if(inSearchMode){ onSearchClick("")
+                  setSearchValue("")
+                }
+                  else onSearchClick(searchValue)
+              }}
+              class={`${!intialData && "disable-button"} text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-7 py-1.5 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700`}
             >
+              {!inSearchMode ? (
               <svg
                 width="24"
                 height="24"
@@ -50,16 +67,19 @@ export default function FilterSearch() {
                   fill="currentColor"
                 />
               </svg>
+              ):(<span>Clear</span>)}
             </button>
           </div>
         </form>
       </div>
       <div className="filter ml-2 mt-4 sm:mt-0 w-full sm:w-auto mr-11 ml-11 sm:mr-0 sm:ml-0">
-        <Select
-          value={filterPref}
-          onChange={(e) => setFilter(e)}
-          options={category}
-        />
+          <Select
+            value={filterPref}
+            onChange={(e) => {
+              if(intialData) setFilter(e)
+            }}
+            options={category}
+          />
       </div>
     </div>
   );

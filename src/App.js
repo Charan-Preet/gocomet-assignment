@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { DataContextProvider } from "./context";
+import 'react-notifications/lib/notifications.css';
 
 import Navbar from "./reusables/NavBar";
 import FilterSearch from "./components/Filter";

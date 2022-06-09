@@ -4,3 +4,8 @@
     padding:0.22rem 1rem 0.22rem 1rem;
 }
 
+.disable-button{
+    opacity:0.5;
+    pointer-events:none;
+}
+

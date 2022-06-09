@@ -18,6 +18,19 @@ export default function Homepage() {
       }
     });
   }, []);
+  const loadingMessage = () => {
+    return(
+      <>
+      <div className='text-center'>
+        Loading...
+        <br/>
+        This is not us it depends upon internet speed and responce time of api
+        </div>
+       
+      </>
+    )  
+  }
+  
   const displayData = intialData?.map((data) => {
     return (
       <div className="max-w-sm rounded overflow-hidden shadow-lg ml-6 mr-6 mt-8">
@@ -58,7 +71,11 @@ export default function Homepage() {
       id="mainPage"
       ref={ref}
     >
-      {displayData}
+      {
+        intialData?(
+          displayData
+        ):(loadingMessage())
+      }
     </div>
   );
 }

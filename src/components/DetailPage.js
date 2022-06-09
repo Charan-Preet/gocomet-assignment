@@ -4,6 +4,10 @@ import { useLocation } from "react-router-dom";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import Cart from "./cart";
 import Modal from "react-awesome-modal";
+import {
+  NotificationContainer,
+  NotificationManager,
+} from "react-notifications";
 
 import "./common.style.css";
 
@@ -28,6 +32,7 @@ export default function DetailView() {
   };
 
   useEffect(() => {
+    debugger;
     const sizeData = sendSizeDetails();
     setGetSize(sizeData);
     const id = location.pathname.split("/")[2];
@@ -59,7 +64,6 @@ export default function DetailView() {
   });
   //event handelings
   document.querySelector("#select-size")?.addEventListener("click", (e) => {
-    e.preventDefault();
     if (e.target.matches(".size-select-container")) {
       const id = e.target.id.toString();
       const collection = [];
@@ -202,15 +206,19 @@ export default function DetailView() {
             {data && (
               <button
                 type="button"
-                onClick={() =>
+                onClick={() => {
                   addToCart(
                     currentItemId,
                     selectedSize,
                     data.title,
                     data.image,
                     coustomId
-                  )
-                }
+                  );
+                  NotificationManager.success(
+                    "Item added to the cart",
+                    "Added to the cart"
+                  );
+                }}
                 className={`add-to-cart sm:w-50 text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 ${
                   selectedSize === "" && "opacity-50 pointer-events-none"
                 }`}
@@ -252,6 +260,7 @@ export default function DetailView() {
     <>
       {coustomModal()}
       <div className="flex justify-center mt-4 ml-2">{detailsDisplay()}</div>
+      <NotificationContainer />
     </>
   );
 }
